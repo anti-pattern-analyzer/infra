@@ -81,19 +81,6 @@ services:
     volumes:
       - kafka2-data:/var/lib/kafka/data
 
-  # Redis Service
-  redis:
-    image: redis:latest
-    container_name: redis-logging
-    restart: always
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis-data:/data
-    networks:
-      - logging-wrapper
-
   # Kafka UI
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -111,6 +98,24 @@ services:
     networks:
       - logging-wrapper
 
+  # Neo4j Service
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    restart: always
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/H7t-YFBxjSBWxIFnhO7OaGAjKwk6c-q5wxq_yP95E1M
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+      - neo4j-import:/var/lib/neo4j/import
+      - neo4j-plugins:/plugins
+    networks:
+      - logging-wrapper
+
 volumes:
   zookeeper-data:
   zookeeper-log:
@@ -119,6 +124,10 @@ volumes:
   redis-data:
   timescale_data:
     name: timescale_data
+  neo4j-data:
+  neo4j-logs:
+  neo4j-import:
+  neo4j-plugins:
 
 networks:
   logging-wrapper:
