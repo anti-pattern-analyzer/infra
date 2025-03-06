@@ -17,9 +17,6 @@ spec:
       containers:
         - name: neo4j
           image: neo4j:latest
-          ports:
-            - containerPort: 7687
-            - containerPort: 7474
           env:
             - name: NEO4J_AUTH
               value: "neo4j/H7t-YFBxjSBWxIFnhO7OaGAjKwk6c-q5wxq_yP95E1M"
