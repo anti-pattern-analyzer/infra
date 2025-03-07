@@ -14,12 +14,15 @@ spec:
       labels:
         app: neo4j
     spec:
+      enableServiceLinks: false
       containers:
         - name: neo4j
           image: neo4j:latest
           env:
             - name: NEO4J_AUTH
               value: "neo4j/H7t-YFBxjSBWxIFnhO7OaGAjKwk6c-q5wxq_yP95E1M"
+            - name: SERVER_CONFIG_STRICT_VALIDATION_ENABLED
+              value: "false"
           volumeMounts:
             - mountPath: /data
               name: neo4j-storage
