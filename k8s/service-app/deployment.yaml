@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serviceapp
+  namespace: logging-wrapper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: serviceapp
+  template:
+    metadata:
+      labels:
+        app: serviceapp
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: serviceapp
+          image: ghcr.io/anti-pattern-analyzer/serviceapp:20250307011656
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: "serviceapp"
+            - name: SERVER_PORT
+              value: "8080"
+
+            # Kafka Configuration
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-1:9091,kafka-2:9092"
+            - name: SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS
+              value: "kafka-1:9091,kafka-2:9092"
+            - name: SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS
+              value: "kafka-1:9091,kafka-2:9092"
+
+            # Producer Config
+            - name: SPRING_KAFKA_PRODUCER_KEY_SERIALIZER
+              value: "org.apache.kafka.common.serialization.StringSerializer"
+            - name: SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER
+              value: "org.apache.kafka.common.serialization.StringSerializer"
+            - name: SPRING_KAFKA_PRODUCER_ACKS
+              value: "all"
+
+            # Consumer Config
+            - name: SPRING_KAFKA_CONSUMER_GROUP_ID
+              value: "serviceapp-group"
+            - name: SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET
+              value: "earliest"
+            - name: SPRING_KAFKA_CONSUMER_ENABLE_AUTO_COMMIT
+              value: "true"
+            - name: SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER
+              value: "org.apache.kafka.common.serialization.StringDeserializer"
+            - name: SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER
+              value: "org.apache.kafka.common.serialization.StringDeserializer"
+
+            # Kafka Topic
+            - name: TRACE_KAFKA_TOPIC
+              value: "async-trace-logs"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serviceapp
+  namespace: logging-wrapper
+spec:
+  selector:
+    app: serviceapp
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

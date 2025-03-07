@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-processor
+  namespace: logging-wrapper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-processor
+  template:
+    metadata:
+      labels:
+        app: log-processor
+    spec:
+      containers:
+        - name: log-processor
+          image: ghcr.io/anti-pattern-analyzer/log-processor:20250306175351
+          ports:
+            - containerPort: 8085
+          env:
+            # Neo4j Configuration
+            - name: NEO4J_URI
+              value: "bolt://neo4j:7687"
+            - name: NEO4J_USERNAME
+              value: "neo4j"
+            - name: NEO4J_PASSWORD
+              value: "H7t-YFBxjSBWxIFnhO7OaGAjKwk6c-q5wxq_yP95E1M"
+
+            # TimescaleDB Configuration
+            - name: TIMESCALEDB_HOST
+              value: "timescaledb"
+            - name: TIMESCALEDB_PORT
+              value: "5432"
+            - name: TIMESCALEDB_USER
+              value: "user"
+            - name: TIMESCALEDB_PASSWORD
+              value: "password"
+            - name: TIMESCALEDB_NAME
+              value: "logs"
+
+            # Kafka Configuration
+            - name: KAFKA_BROKERS
+              value: "kafka-1:9091,kafka-2:9092"
+            - name: KAFKA_TOPIC
+              value: "logs-topic"
+            - name: KAFKA_GROUP
+              value: "log-processor-group"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-processor
+  namespace: logging-wrapper
+spec:
+  selector:
+    app: log-processor
+  ports:
+    - protocol: TCP
+      port: 8085
+      targetPort: 8085
+  type: ClusterIP

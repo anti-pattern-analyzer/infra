@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pattern-analyzer
+  namespace: logging-wrapper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pattern-analyzer
+  template:
+    metadata:
+      labels:
+        app: pattern-analyzer
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: pattern-analyzer
+          image: ghcr.io/anti-pattern-analyzer/pattern-analyzer:20250306182512
+          ports:
+            - containerPort: 8000
+          env:
+            - name: NEO4J_URI
+              value: "bolt://neo4j:7687"
+            - name: NEO4J_USERNAME
+              value: "neo4j"
+            - name: NEO4J_PASSWORD
+              value: "H7t-YFBxjSBWxIFnhO7OaGAjKwk6c-q5wxq_yP95E1M"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pattern-analyzer
+  namespace: logging-wrapper
+spec:
+  selector:
+    app: pattern-analyzer
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
